@@ -193,8 +193,19 @@ void abrirConexao(void) {
     }
 }
 
+/* Fecha uma conexao aberta e atualiza seu estado somente se o comando funcionar. */
 void fecharConexao(void) {
-    
+    if (!conexaoAberta) {
+        printf("Conexao ja esta fechada.\n");
+        return;
+    }
+    int retorno = FechaConexaoImpressora();
+    if (retorno == 0) {
+        conexaoAberta = 0;
+        printf("Conexao fechada com sucesso.\n");
+    } else {
+        printf("Erro ao fechar conexao. Codigo: %d\n", retorno);
+    }
 }
 
 /* Confere a conexao, le o texto e as copias, imprime em um laco e verifica o corte. */
@@ -353,16 +364,46 @@ void imprimirXMLCancelamentoSAT(void) {
     }
 }
 
+/* Confere a conexao e o retorno do comando de abertura da gaveta Elgin. */
 void abrirGavetaElgin(void) {
-    
+    if (!conexaoAberta) {
+        printf("Conexao fechada. Abra a conexao antes (opcao 2).\n");
+        return;
+    }
+    int retorno = AbreGavetaElgin(1, 50, 50);
+    if (retorno == 0) {
+        printf("Gaveta Elgin aberta com sucesso.\n");
+    } else {
+        printf("Erro ao abrir gaveta Elgin. Codigo: %d\n", retorno);
+    }
 }
 
+/* Confere a conexao e o retorno do comando alternativo de abertura da gaveta. */
 void abrirGaveta(void) {
-    
+    if (!conexaoAberta) {
+        printf("Conexao fechada. Abra a conexao antes (opcao 2).\n");
+        return;
+    }
+    int retorno = AbreGaveta(1, 5, 10);
+    if (retorno == 0) {
+        printf("Gaveta aberta com sucesso.\n");
+    } else {
+        printf("Erro ao abrir gaveta. Codigo: %d\n", retorno);
+    }
 }
 
+/* Confere a conexao e envia quatro sinais sonoros, mostrando sucesso ou erro. */
 void emitirSinalSonoro(void) {
-    
+    if (!conexaoAberta) {
+        printf("Conexao fechada. Abra a conexao antes (opcao 2).\n");
+        return;
+    }
+    int retorno = SinalSonoro(4, 50, 5);
+    if (retorno == 0) {
+        printf("Sinal sonoro enviado com sucesso.\n");
+    } else {
+        printf("Erro ao emitir sinal sonoro. Codigo: %d\n", retorno);
+    }
 }
 
 /* Mostra todas as opcoes do programa, incluindo a opcao zero para sair. */
