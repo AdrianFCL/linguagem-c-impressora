@@ -197,30 +197,160 @@ void fecharConexao(void) {
     
 }
 
+/* Confere a conexao, le o texto e as copias, imprime em um laco e verifica o corte. */
 void imprimirTexto(void) {
-   
+    if (!conexaoAberta) {
+        printf("Conexao fechada. Abra a conexao antes (opcao 2).\n");
+        return;
+    }
+    char texto[200];
+    capturarEntrada("Texto a imprimir: ", texto, 199);
+    if (texto[0] == '\0') {
+        printf("Texto vazio. Impressao cancelada.\n");
+        return;
+    }
+    int copias = lerInteiro("Quantas copias? ");
+    if (copias < 1) {
+        printf("A quantidade deve ser maior que zero.\n");
+        return;
+    }
+    /* A quebra de linha envia cada copia do buffer para o papel. */
+    int posicao = 0;
+    while (texto[posicao] != '\0') {
+        posicao++;
+    }
+    texto[posicao] = '\n';
+    texto[posicao + 1] = '\0';
+    for (int i = 0; i < copias; i++) {
+        int retorno = ImpressaoTexto(texto, 1, 4, 0);
+        if (retorno < 0) {
+            printf("Erro ao imprimir copia %d. Codigo: %d\n", i + 1, retorno);
+            return;
+        }
+        printf("Copia %d enviada com sucesso.\n", i + 1);
+    }
+    int retornoCorte = Corte(5);
+    if (retornoCorte == 0) {
+        printf("Papel cortado com sucesso.\n");
+    } else {
+        printf("Erro ao cortar papel. Codigo: %d\n", retornoCorte);
+    }
 }
 
+/* Confere a conexao, le o conteudo, imprime o QR Code e verifica o corte. */
 void imprimirQRCode(void) {
-    
+    if (!conexaoAberta) {
+        printf("Conexao fechada. Abra a conexao antes (opcao 2).\n");
+        return;
+    }
+    char dados[300];
+    capturarEntrada("Conteudo do QR Code: ", dados, 300);
+    if (dados[0] == '\0') {
+        printf("Conteudo vazio. Impressao cancelada.\n");
+        return;
+    }
+    int retorno = ImpressaoQRCode(dados, 6, 4);
+    if (retorno != 0) {
+        printf("Erro ao imprimir QR Code. Codigo: %d\n", retorno);
+        return;
+    }
+    printf("QR Code enviado com sucesso.\n");
+    int retornoCorte = Corte(5);
+    if (retornoCorte == 0) {
+        printf("Papel cortado com sucesso.\n");
+    } else {
+        printf("Erro ao cortar papel. Codigo: %d\n", retornoCorte);
+    }
 }
 
+/* Confere a conexao, imprime o codigo de barras de exemplo e verifica o corte. */
 void imprimirCodigoBarras(void) {
-    
+    if (!conexaoAberta) {
+        printf("Conexao fechada. Abra a conexao antes (opcao 2).\n");
+        return;
+    }
+    int retorno = ImpressaoCodigoBarras(8, "{A012345678912", 100, 2, 3);
+    if (retorno != 0) {
+        printf("Erro ao imprimir codigo de barras. Codigo: %d\n", retorno);
+        return;
+    }
+    printf("Codigo de barras enviado com sucesso.\n");
+    int retornoCorte = Corte(5);
+    if (retornoCorte == 0) {
+        printf("Papel cortado com sucesso.\n");
+    } else {
+        printf("Erro ao cortar papel. Codigo: %d\n", retornoCorte);
+    }
 }
 
+/* Le o XML SAT em um vetor, envia para a impressora e verifica o corte. */
 void imprimirXMLSAT(void) {
-    
-        /* le o arquivo XML (na raiz do projeto) para a memoria */
-        //char *dadosXML = lerArquivo("XMLSAT.xml");
-        
+    if (!conexaoAberta) {
+        printf("Conexao fechada. Abra a conexao antes (opcao 2).\n");
+        return;
+    }
+    char dadosXML[10000];
+    FILE *arquivo = fopen("XMLSAT.xml", "rb");
+    if (arquivo == NULL) {
+        printf("Nao foi possivel ler o XMLSAT.xml.\n");
+        return;
+    }
+    /* Se o vetor ficar cheio, falta espaco para marcar o fim do texto. */
+    int quantidade = fread(dadosXML, 1, 10000, arquivo);
+    fclose(arquivo);
+    if (quantidade == 0) {
+        printf("O arquivo XMLSAT.xml esta vazio.\n");
+        return;
+    }
+    if (quantidade == 10000) {
+        printf("O arquivo XMLSAT.xml ultrapassa 9999 bytes.\n");
+        return;
+    }
+    dadosXML[quantidade] = '\0';
+    int retorno = ImprimeXMLSAT(dadosXML, 0);
+    if (retorno != 0) {
+        printf("Erro ao imprimir XML SAT. Codigo: %d\n", retorno);
+        return;
+    }
+    printf("XML SAT enviado com sucesso.\n");
+    int retornoCorte = Corte(5);
+    if (retornoCorte == 0) {
+        printf("Papel cortado com sucesso.\n");
+    } else {
+        printf("Erro ao cortar papel. Codigo: %d\n", retornoCorte);
+    }
 }
 
+/* Le o XML de cancelamento em um vetor e imprime com a assinatura fornecida. */
 void imprimirXMLCancelamentoSAT(void) {
-    	
-    	/* le o arquivo XML (na raiz do projeto) para a memoria */
-        //char *dadosXML = lerArquivo("CANC_SAT.xml");
-        
+    if (!conexaoAberta) {
+        printf("Conexao fechada. Abra a conexao antes (opcao 2).\n");
+        return;
+    }
+    char dadosXML[10000];
+    FILE *arquivo = fopen("CANC_SAT.xml", "rb");
+    if (arquivo == NULL) {
+        printf("Nao foi possivel ler o CANC_SAT.xml.\n");
+        return;
+    }
+    /* Se o vetor ficar cheio, falta espaco para marcar o fim do texto. */
+    int quantidade = fread(dadosXML, 1, 10000, arquivo);
+    fclose(arquivo);
+    if (quantidade == 0) {
+        printf("O arquivo CANC_SAT.xml esta vazio.\n");
+        return;
+    }
+    if (quantidade == 10000) {
+        printf("O arquivo CANC_SAT.xml ultrapassa 9999 bytes.\n");
+        return;
+    }
+    dadosXML[quantidade] = '\0';
+    int retorno = ImprimeXMLCancelamentoSAT(dadosXML, ASS_QRCODE, 0);
+    if (retorno == 0) {
+        printf("XML de cancelamento SAT enviado com sucesso.\n");
+    } else {
+        printf("Erro ao imprimir cancelamento SAT. Codigo: %d\n", retorno);
+    }
 }
 
 void abrirGavetaElgin(void) {
